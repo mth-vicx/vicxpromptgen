@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<!-- Vicx Reel Forge - Netlify Edition -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0e0d0b">
+<title>Vicx Reel Forge — AI Video Prompt Generator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+:root{--bg:#0e0d0b;--panel:#17150f;--panel-2:#1e1b14;--line:#322d21;--line-soft:#262218;--amber:#d99a3f;--amber-dim:#8a6a35;--text:#ece6d8;--text-dim:#a89f8c;--text-faint:#6f6858;--green:#6f9c5c;--red:#b4523f;--radius:6px}
+*,*::before,*::after{box-sizing:border-box}html{width:100%;overflow-x:hidden;scroll-behavior:smooth}body{width:100%;min-height:100vh;margin:0;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;line-height:1.5;overflow-x:hidden;-webkit-text-size-adjust:100%}button,input,select,textarea{font:inherit;max-width:100%}.wrap{width:min(100%,1100px);margin:auto;padding:clamp(24px,5vw,42px) max(16px,env(safe-area-inset-right)) max(50px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+header{margin-bottom:clamp(24px,4vw,34px)}.kicker,.field-label,.spec-title,footer,.gen-btn,.copy-btn,.dl-all,.clear-btn{font-family:'IBM Plex Mono',monospace}.kicker{font-size:10px;color:var(--amber-dim);letter-spacing:.08em;margin-bottom:8px}h1{font-family:Fraunces,serif;font-weight:500;font-size:clamp(27px,5vw,40px);line-height:1.08;margin:0 0 10px}.sub{color:var(--text-dim);font-size:clamp(13px,1.8vw,14px);max-width:650px;margin:0}
+.board{width:100%;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}.cell{min-width:0;background:var(--panel);padding:clamp(16px,3vw,26px)}
+.field{margin-bottom:20px}.field-label{display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.05em;color:var(--text-faint);margin-bottom:8px}
+textarea{display:block;width:100%;min-height:105px;max-height:190px;background:var(--bg);border:1px solid var(--line-soft);color:var(--text);font-size:14px;line-height:1.5;padding:12px;border-radius:4px;resize:vertical;overflow:auto}textarea::placeholder{color:var(--text-faint)}textarea:focus,select:focus{outline:none;border-color:var(--amber-dim)}
+select{display:block;width:100%;height:42px;background:var(--bg);border:1px solid var(--line-soft);color:var(--text);font-size:13px;padding:0 36px 0 12px;border-radius:4px}
+.slider-row{display:flex;align-items:center;gap:12px}input[type=range]{flex:1;width:100%;height:18px;background:transparent;cursor:pointer}input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--line-soft)}input[type=range]::-moz-range-track{height:2px;background:var(--line-soft)}input[type=range]::-webkit-slider-thumb{appearance:none;width:16px;height:16px;margin-top:-7px;background:var(--amber);border:0;border-radius:50%}input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--amber);border:0;border-radius:50%}.slider-num{flex:0 0 32px;font:20px Fraunces,serif;color:var(--amber);text-align:right}.slider-caption{font-size:11px;color:var(--text-faint);margin-top:4px}
+.toggle-row{display:flex;border:1px solid var(--line-soft);border-radius:4px;overflow:hidden}.toggle-opt{flex:1;min-width:0;min-height:38px;padding:8px 5px;text-align:center;font-size:12px;color:var(--text-dim);background:var(--bg);cursor:pointer;border:0;border-right:1px solid var(--line-soft);transition:.15s}.toggle-opt:last-child{border-right:0}.toggle-opt.on{background:var(--panel-2);color:var(--amber);font-weight:500}
+.gen-btn{display:block;width:100%;min-height:48px;padding:13px 14px;background:var(--amber);color:#171208;border:0;border-radius:4px;font-size:12px;letter-spacing:.05em;font-weight:500;cursor:pointer;margin-top:24px}.gen-btn:disabled{background:var(--line-soft);color:var(--text-faint);cursor:not-allowed}.err{color:var(--red);font-size:12px;margin-top:10px;display:none;line-height:1.4}.loading-line{font:11px 'IBM Plex Mono',monospace;color:var(--amber-dim);margin-top:10px}
+.spec-title{font-size:10px;letter-spacing:.06em;color:var(--text-faint);margin-bottom:14px}.spec-line{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:12px}.spec-key{color:var(--text-dim)}.spec-val{flex:0 1 58%;color:var(--text);font:10.5px 'IBM Plex Mono',monospace;text-align:right;overflow-wrap:anywhere}
+.history-box{margin-top:24px;padding-top:16px;border-top:1px solid var(--line-soft)}.history-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.history-list{list-style:none;padding:0;margin:0;max-height:180px;overflow:auto}.history-item{font-size:11.5px;color:var(--text-dim);padding:7px 8px;border-bottom:1px solid var(--line-soft);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.clear-btn{font-size:10px;color:var(--text-faint);background:none;border:0;cursor:pointer;padding:4px 0}
+#output{width:100%;margin-top:clamp(28px,5vw,42px);display:none}#output.show{display:block}.output-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.output-head h2{font:500 clamp(20px,3vw,23px) Fraunces,serif;margin:0}.dl-all{font-size:10px;color:var(--amber-dim);background:none;border:1px solid var(--line-soft);padding:7px 10px;border-radius:4px;cursor:pointer}.seg-card{border:1px solid var(--line);border-radius:4px;margin-bottom:12px;overflow:hidden;background:var(--panel)}.seg-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:var(--panel-2);border-bottom:1px solid var(--line);cursor:pointer}.seg-title{flex:1;min-width:0;font-size:12px;font-weight:500;overflow-wrap:anywhere}.idx{color:var(--amber);font-family:'IBM Plex Mono',monospace;margin-right:5px}.seg-tag{display:inline-block;font:8.5px 'IBM Plex Mono',monospace;color:var(--amber-dim);margin-left:5px;border:1px solid var(--line-soft);padding:1px 5px;border-radius:3px}.seg-actions{display:flex;gap:5px}.copy-btn{font-size:9.5px;padding:5px 7px;background:var(--bg);border:1px solid var(--line-soft);color:var(--text-dim);border-radius:3px;cursor:pointer}.copy-btn.copied{border-color:var(--green);color:var(--green)}.seg-body{padding:14px;display:none;overflow:hidden}.seg-body.expanded{display:block}.seg-body pre{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font:11px/1.55 'IBM Plex Mono',monospace;color:var(--text-dim);margin:0}footer{margin-top:42px;padding-top:16px;border-top:1px solid var(--line-soft);font-size:9.5px;color:var(--text-faint)}
+@media(max-width:900px){.board{grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr)}.cell{padding:20px}}@media(max-width:767px){.board{grid-template-columns:1fr}.board .cell+.cell{border-top:1px solid var(--line)}.cell{padding:18px}.output-head{align-items:flex-start}}@media(max-width:520px){.wrap{padding:20px 12px 50px}.cell{padding:15px}.output-head,.seg-head{flex-direction:column;align-items:stretch}.dl-all,.copy-btn{width:100%}.seg-actions{width:100%}.copy-btn{min-height:34px}.toggle-opt{min-height:40px;font-size:10.5px}.seg-body{padding:11px}.seg-body pre{font-size:10px}}@media(max-width:380px){.wrap{padding-left:9px;padding-right:9px}.cell{padding:13px}h1{font-size:26px}.toggle-opt{font-size:9.5px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="kicker">VICX REEL FORGE — GEMINI POWERED</div>
+<h1>Tulis ceritanya.<br>Kami susun segmennya.</h1>
+<p class="sub">Generator prompt video untuk Google Flow didukung oleh Google Gemini API. Tampilan responsif dan stabil untuk semua perangkat.</p>
+</header>
+
+<div class="board">
+<div class="cell">
+<div class="field"><div class="field-label"><span>INTI CERITA</span></div><textarea id="storyInput" placeholder="Contoh: Kisah penemuan resep kopi kuno yang mengubah kehidupan sebuah desa kecil."></textarea></div>
+<div class="field"><div class="field-label"><span>GAYA VISUAL</span></div><select id="styleSelect">
+<option>Hyper-Realistic</option><option>Live-Action</option><option>Cinematic Movie</option><option>Anime 2D</option><option>Japanese Animation</option><option>3D Animation</option><option>CGI Studio</option><option>Watercolor Painting</option><option>Artistic Painting</option><option>Cyberpunk</option><option>Futuristic Neon</option><option>Vintage 80s</option><option>Retro VHS</option><option>Documentary</option><option>Raw Real Footage</option>
+</select></div>
+<div class="field"><div class="field-label"><span>TONE DAN JENIS CERITA</span></div><select id="genreSelect">
+<option>Drama Sinematik</option><option>Sedih dan Emosional</option><option>Bahagia dan Ceria</option><option>Laporan Reporter</option><option>Bincang Talkshow</option><option>Pemberitaan Resmi</option><option>Sleep Story Pengantar Tidur</option><option>Komedi Lucu</option><option>Serius dan Formal</option><option>Marah dan Tegang</option>
+</select></div>
+<div class="field"><div class="field-label"><span>BUMPER INTRO (WATERCOLOR)</span></div><div class="toggle-row"><button class="toggle-opt on" data-group="intro" data-val="yes">Aktif</button><button class="toggle-opt" data-group="intro" data-val="no">Non-aktif</button></div></div>
+<div class="field"><div class="field-label"><span>VOICEOVER</span></div><div class="toggle-row"><button class="toggle-opt" data-group="voice" data-val="none">No Voice</button><button class="toggle-opt" data-group="voice" data-val="male">Pria</button><button class="toggle-opt on" data-group="voice" data-val="female">Wanita</button></div></div>
+<div class="field"><div class="field-label"><span>B-ROLL INTI (SEGMEN UTAMA)</span></div><div class="toggle-row"><button class="toggle-opt on" data-group="coreBroll" data-val="yes">Aktif</button><button class="toggle-opt" data-group="coreBroll" data-val="no">Non-aktif</button></div></div>
+<div class="field"><div class="field-label"><span>OUTRO B-ROLL</span></div><div class="toggle-row"><button class="toggle-opt on" data-group="outroBroll" data-val="yes">Aktif</button><button class="toggle-opt" data-group="outroBroll" data-val="no">Non-aktif</button></div></div>
+<div class="field"><div class="field-label"><span>JUMLAH SEGMEN</span></div><div class="slider-row"><input type="range" id="segSlider" min="5" max="15" value="10"><span class="slider-num" id="segNum">10</span></div><div class="slider-caption" id="segCaption">10 segmen susunan lengkap</div></div>
+<div class="field"><div class="field-label"><span>DURASI PER SEGMEN UTAMA</span></div><select id="durationSelect"><option value="5">5 detik</option><option value="8">8 detik</option><option value="10">10 detik</option></select></div>
+<div class="field"><div class="field-label"><span>MUSIK</span></div><div class="toggle-row"><button class="toggle-opt on" data-group="music" data-val="yes">Dengan musik</button><button class="toggle-opt" data-group="music" data-val="no">Tanpa musik</button></div></div>
+<button class="gen-btn" id="genBtn">GENERATE PROMPTS →</button>
+<div class="err" id="errBox"></div><div class="loading-line" id="loadingLine" style="display:none"></div>
+</div>
+
+<div class="cell">
+<div class="spec-title">SPESIFIKASI OUTPUT</div>
+<div class="spec-line"><span class="spec-key">AI Engine</span><span class="spec-val">Gemini Flash</span></div>
+<div class="spec-line"><span class="spec-key">Gaya Visual</span><span class="spec-val" id="specStyleVal">Hyper-Realistic</span></div>
+<div class="spec-line"><span class="spec-key">Tone Cerita</span><span class="spec-val" id="specGenreVal">Drama Sinematik</span></div>
+<div class="spec-line"><span class="spec-key">Bumper Intro</span><span class="spec-val" id="specIntroVal">Aktif</span></div>
+<div class="spec-line"><span class="spec-key">Voiceover</span><span class="spec-val" id="specVoiceVal">Wanita</span></div>
+<div class="spec-line"><span class="spec-key">B-Roll Inti</span><span class="spec-val" id="specCoreBrollVal">Aktif</span></div>
+<div class="spec-line"><span class="spec-key">Outro B-Roll</span><span class="spec-val" id="specOutroBrollVal">Aktif</span></div>
+<div class="spec-line"><span class="spec-key">Aspect Ratio</span><span class="spec-val">16:9 · 60fps</span></div>
+<div class="spec-line"><span class="spec-key">Format</span><span class="spec-val">copy-paste ready</span></div>
+<div class="history-box"><div class="history-head"><span class="spec-title" style="margin:0">RIWAYAT CERITA</span><button class="clear-btn" id="clearHistory">Hapus</button></div><ul class="history-list" id="historyList"></ul></div>
+</div>
+</div>
+
+<div id="output"><div class="output-head"><h2>Hasil generate</h2><button class="dl-all" id="downloadAll">↓ Download semua (.md)</button></div><div id="segList"></div></div>
+<footer>VICX REEL FORGE — generator prompt video AI · API key aman di server</footer>
+</div>
+
+<script>
+const state={intro:'yes',voice:'female',coreBroll:'yes',outroBroll:'yes',music:'yes'};
+let segments=[];
+let storyHistory=JSON.parse(localStorage.getItem('vicx_story_history')||'[]');
+const $=id=>document.getElementById(id);
+const storyInput=$('storyInput'),segSlider=$('segSlider'),segNum=$('segNum'),segCaption=$('segCaption'),durationSelect=$('durationSelect'),styleSelect=$('styleSelect'),genreSelect=$('genreSelect');
+const specStyleVal=$('specStyleVal'),specGenreVal=$('specGenreVal'),specIntroVal=$('specIntroVal'),specVoiceVal=$('specVoiceVal'),specCoreBrollVal=$('specCoreBrollVal'),specOutroBrollVal=$('specOutroBrollVal'),historyList=$('historyList'),genBtn=$('genBtn'),errBox=$('errBox'),loadingLine=$('loadingLine'),outputDiv=$('output'),segList=$('segList');
+
+function updateHistoryUI(){historyList.innerHTML='';if(!storyHistory.length){historyList.innerHTML='<li class="history-item" style="cursor:default;color:var(--text-faint)">Belum ada riwayat.</li>';return}storyHistory.forEach(item=>{const li=document.createElement('li');li.className='history-item';li.textContent=item;li.onclick=()=>{storyInput.value=item;storyInput.focus();scrollTo({top:0,behavior:'smooth'})};historyList.appendChild(li)})}
+$('clearHistory').onclick=()=>{storyHistory=[];localStorage.removeItem('vicx_story_history');updateHistoryUI()};
+function updateCaption(){const n=+segSlider.value;segNum.textContent=n;segCaption.textContent=`${n} segmen susunan lengkap`;specStyleVal.textContent=styleSelect.value;specGenreVal.textContent=genreSelect.value;specIntroVal.textContent=state.intro==='yes'?'Aktif':'Non-aktif';specVoiceVal.textContent={none:'No Voice',male:'Pria',female:'Wanita'}[state.voice];specCoreBrollVal.textContent=state.coreBroll==='yes'?'Aktif':'Non-aktif';specOutroBrollVal.textContent=state.outroBroll==='yes'?'Aktif':'Non-aktif'}
+segSlider.oninput=updateCaption;styleSelect.onchange=updateCaption;genreSelect.onchange=updateCaption;durationSelect.onchange=updateCaption;
+document.querySelectorAll('.toggle-opt').forEach(btn=>btn.onclick=()=>{document.querySelectorAll(`.toggle-opt[data-group="${btn.dataset.group}"]`).forEach(b=>b.classList.remove('on'));btn.classList.add('on');state[btn.dataset.group]=btn.dataset.val;updateCaption()});
+updateCaption();updateHistoryUI();
+
+async function fetchGeminiContent(systemPrompt,userQuery){
+  const response=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({systemPrompt,userQuery})});
+  let data={};try{data=await response.json()}catch{}
+  if(!response.ok)throw new Error(data.error||`Server error ${response.status}`);
+  if(!data.text)throw new Error('Respon dari Gemini API kosong.');
+  return data.text;
+}
+const loadingMsgs=['Menyusun alur cerita dengan Gemini...','Menyesuaikan gaya visual & tone emosi...','Menyusun komposisi naskah & B-roll...','Menulis prompt segmen sinematik...','Hampir selesai...'];
+
+async function generate(){
+  const story=storyInput.value.trim();errBox.style.display='none';
+  if(!story){errBox.textContent='Tulis inti cerita dulu sebelum generate.';errBox.style.display='block';storyInput.focus();return}
+  const norm=t=>t.toLowerCase().replace(/\s+/g,'');
+  if(storyHistory.some(x=>norm(x)===norm(story))){errBox.textContent='Cerita ini sudah pernah dibuat sebelumnya! Silakan masukkan cerita baru atau modifikasi inti ceritanya.';errBox.style.display='block';return}
+  const n=+segSlider.value,duration=+durationSelect.value,style=styleSelect.value,genre=genreSelect.value;
+  genBtn.disabled=true;genBtn.textContent='GENERATING...';loadingLine.style.display='block';let mi=0;loadingLine.textContent=loadingMsgs[0];const timer=setInterval(()=>{mi=(mi+1)%loadingMsgs.length;loadingLine.textContent=loadingMsgs[mi]},1800);
+  const intro=state.intro==='yes'?`--- 1. BUMPER INTRO (WATERCOLOR TITLE) ---
+Visual: Artistic watercolor painting background yang temanya sesuai dengan isi segmen ini. Soft fluid watercolor animation, ink bleed effect.
+Text Overlay: Berisi teks judul singkat segmen dalam Bahasa Indonesia di tengah layar.
+Style: "Artistic watercolor animation, ink bleeding into paper, elegant text overlay, 4k cinematic".`:'[Bumper Intro dinonaktifkan]';
+  const voice=state.voice==='male'?`Sertakan VOICEOVER dengan narator PRIA. Tulis narasi dalam Bahasa Indonesia dengan intonasi/tone khas genre "${genre}", singkat, dan pas dengan durasi.`:state.voice==='female'?`Sertakan VOICEOVER dengan narator WANITA. Tulis narasi dalam Bahasa Indonesia dengan intonasi/tone khas genre "${genre}", singkat, dan pas dengan durasi.`:'JANGAN sertakan voiceover atau narasi apapun (NO VOICE / SILENT NARRATION).';
+  const music=state.music==='yes'?`Sertakan background music yang disesuaikan secara khusus untuk mendukung suasana "${genre}".`:'JANGAN sertakan musik (silent total kecuali ambient sound minimal).';
+  const core=state.coreBroll==='yes'?'Di dalam Segmen Utama, sertakan B-roll Inti (visual pendukung/cutaway shot yang relevan) untuk memperkaya cerita.':'Di dalam Segmen Utama, JANGAN gunakan B-roll Inti (fokus hanya pada shot utama cerita).';
+  const outro=state.outroBroll==='yes'?'--- 3. OUTRO B-ROLL ---\nPrompt B-roll silent total (Durasi 3 detik), visual penutup/penghubung ke segmen selanjutnya, sebutkan "TRANSITION: [jenis]" acak di akhir.':'[Outro B-Roll dinonaktifkan]';
+  const transitions=['hard cut on action','quick whip pan','match cut','smash cut','cross dissolve cepat','speed ramp transition'];
+  const systemPrompt=`Anda adalah penulis prompt profesional untuk AI video generator (Google Flow / text-to-video). Tugas Anda adalah memecah cerita menjadi urutan segmen video pendek.
+GAYA VISUAL UTAMA: ${style}.
+TONE / JENIS CERITA: ${genre}.
+Semua skenario, intonasi narasi, pencahayaan, dan dinamika gerak HARUS secara konsisten mencerminkan Gaya Visual "${style}" dan Suasana/Genre "${genre}".
+
+KETENTUAN:
+1. Bumper Intro Watercolor: ${state.intro==='yes'?'AKTIF':'NON-AKTIF'}
+2. Voiceover: ${state.voice.toUpperCase()}
+${voice}
+3. B-Roll Inti: ${state.coreBroll==='yes'?'AKTIF':'NON-AKTIF'}
+${core}
+4. Outro B-Roll: ${state.outroBroll==='yes'?'AKTIF':'NON-AKTIF'}
+5. Musik: ${state.music==='yes'?'AKTIF':'NON-AKTIF'}
+${music}
+
+FORMAT OUTPUT PER SEGMEN — WAJIB IKUTI PERSIS:
+===SEGMENT_START===
+TITLE: [Nomor dan Judul Segmen]
+${intro}
+--- 2. MAIN SEGMENT (${duration}s) ---
+[Prompt Segmen Utama: Gaya "${style}", Genre/Mood "${genre}", Scene A & B, ${core}, Audio/Voiceover (${state.voice}), Transisi dari list: ${transitions.join(', ')}]
+${outro}
+===SEGMENT_END===
+Ulangi format di atas persis untuk semua ${n} segmen secara berurutan.
+Jangan menambahkan teks pembuka atau penutup di luar penanda.`;
+  try{const text=await fetchGeminiContent(systemPrompt,`Cerita: "${story}"\n\nGaya Visual: ${style}\nTone/Genre: ${genre}\nBuat ${n} segmen sesuai ketentuan di atas.`);parseSegments(text);renderSegments();storyHistory.unshift(story);storyHistory=storyHistory.slice(0,50);localStorage.setItem('vicx_story_history',JSON.stringify(storyHistory));updateHistoryUI()}catch(e){errBox.textContent='Gagal generate: '+e.message;errBox.style.display='block'}finally{clearInterval(timer);loadingLine.style.display='none';genBtn.disabled=false;genBtn.textContent='GENERATE PROMPTS →'}
+}
+genBtn.onclick=generate;
+
+function parseSegments(text){segments=[];const re=/===SEGMENT_START===([\s\S]*?)===SEGMENT_END===/g;let m;while((m=re.exec(text))){const c=m[1].trim(),tm=c.match(/TITLE:\s*(.+)/);segments.push({title:tm?tm[1].trim():'Segmen',body:c.replace(/TITLE:\s*.+/,'').trim()})}if(!segments.length)segments=[{title:'Output',body:text.trim()}]}
+function escapeHtml(str){const d=document.createElement('div');d.textContent=str;return d.innerHTML}
+function renderSegments(){segList.innerHTML='';segments.forEach((seg,i)=>{const card=document.createElement('div');card.className='seg-card';card.innerHTML=`<div class="seg-head" data-idx="${i}"><div class="seg-title"><span class="idx">${String(i+1).padStart(2,'0')}</span>${escapeHtml(seg.title)} <span class="seg-tag">Configured</span></div><div class="seg-actions"><button class="copy-btn" data-copy="${i}">Copy Segmen Ini</button></div></div><div class="seg-body" id="body-${i}"><pre>${escapeHtml(seg.body)}</pre></div>`;segList.appendChild(card)});
+document.querySelectorAll('.seg-head').forEach(h=>h.onclick=e=>{if(e.target.closest('.copy-btn'))return;$('body-'+h.dataset.idx).classList.toggle('expanded')});
+document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=e=>{e.stopPropagation();const i=+b.dataset.copy;copyText(`TITLE: ${segments[i].title}\n\n${segments[i].body}`).then(()=>{b.textContent='Copied ✓';b.classList.add('copied');setTimeout(()=>{b.textContent='Copy Segmen Ini';b.classList.remove('copied')},1800)}).catch(()=>{b.textContent='Copy gagal'})});
+outputDiv.classList.add('show');setTimeout(()=>outputDiv.scrollIntoView({behavior:'smooth',block:'start'}),100)}
+async function copyText(text){if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(text);const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove()}
+$('downloadAll').onclick=()=>{if(!segments.length)return;let md=`# Vicx Reel Forge — Video Prompts\n\n**Cerita:** ${storyInput.value.trim()}\n**Gaya Visual:** ${styleSelect.value}\n**Tone Cerita:** ${genreSelect.value}\n**Bumper Intro:** ${state.intro==='yes'?'Aktif':'Non-aktif'}\n**Voiceover:** ${state.voice}\n**B-Roll Inti:** ${state.coreBroll==='yes'?'Aktif':'Non-aktif'}\n**Outro B-Roll:** ${state.outroBroll==='yes'?'Aktif':'Non-aktif'}\n**Musik:** ${state.music==='yes'?'Ya':'Tidak'}\n\n---\n\n`;segments.forEach(s=>md+=`## ${s.title}\n\n\`\`\`\n${s.body}\n\`\`\`\n\n---\n\n`);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([md],{type:'text/markdown;charset=utf-8'}));a.download='vicx-reel-forge-prompts.md';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)};
+</script>
+</body>
+</html>

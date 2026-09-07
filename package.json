@@ -1,0 +1,7 @@
+{
+  "name": "vicx-reel-forge-netlify",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vicx Reel Forge - Gemini powered AI video prompt generator for Netlify",
+  "scripts": {}
+}
