@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "description": "Vicx Reel Forge - Gemini powered AI video prompt generator for Netlify",
-  "scripts": {}
+  "scripts": {},
+  "dependencies": {
+    "@google/genai": "^2.21.0"
+  }
 }

@@ -1,98 +1,81 @@
-exports.handler = async (event) => {
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Method tidak diizinkan." })
-    };
+import { GoogleGenAI } from "@google/genai";
+
+export default async (req) => {
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method tidak diizinkan." }), {
+      status: 405,
+      headers: { "Content-Type": "application/json" }
+    });
   }
 
   try {
-    const body = JSON.parse(event.body || "{}");
+    const body = await req.json().catch(() => ({}));
     const { systemPrompt, userQuery } = body;
 
     if (!systemPrompt || !userQuery) {
-      return {
-        statusCode: 400,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ error: "Prompt tidak lengkap." })
-      };
-    }
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return {
-        statusCode: 500,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          error: "GEMINI_API_KEY belum dikonfigurasi di Netlify."
-        })
-      };
-    }
-
-    const model = process.env.GEMINI_MODEL || "gemini-flash-latest";
-    const url =
-      `https://generativelanguage.googleapis.com/v1beta/models/` +
-      `${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
-
-    const payload = {
-      contents: [{ parts: [{ text: userQuery }] }],
-      systemInstruction: { parts: [{ text: systemPrompt }] }
-    };
-
-    const delays = [1000, 2000, 4000];
-    let response;
-
-    for (let attempt = 0; attempt <= delays.length; attempt++) {
-      response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+      return new Response(JSON.stringify({ error: "Prompt tidak lengkap." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
       });
+    }
 
-      if (response.ok) break;
+    const ai = new GoogleGenAI({});
+    const model = process.env.GEMINI_MODEL || "gemini-flash-latest";
 
-      if (attempt < delays.length) {
-        await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+    const attemptTimeoutMs = 25000;
+    const maxAttempts = 2;
+    const retryDelayMs = 500;
+    let lastError;
+
+    const withTimeout = (promise, ms) =>
+      Promise.race([
+        promise,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Permintaan ke Gemini terlalu lama (timeout).")), ms)
+        )
+      ]);
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const response = await withTimeout(
+          ai.models.generateContent({
+            model,
+            contents: userQuery,
+            config: { systemInstruction: systemPrompt }
+          }),
+          attemptTimeoutMs
+        );
+
+        const text = response?.text || "";
+
+        if (!text) {
+          throw new Error("Respon Gemini kosong.");
+        }
+
+        return new Response(JSON.stringify({ text }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        });
+      } catch (error) {
+        lastError = error;
+        if (attempt < maxAttempts - 1) {
+          await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+        }
       }
     }
 
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      return {
-        statusCode: response.status,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          error: data?.error?.message || `Gemini API error ${response.status}`
-        })
-      };
-    }
-
-    const text =
-      data?.candidates?.[0]?.content?.parts
-        ?.map(part => part.text || "")
-        .join("") || "";
-
-    if (!text) {
-      return {
-        statusCode: 502,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ error: "Respon Gemini kosong." })
-      };
-    }
-
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
-    };
+    console.error(lastError);
+    return new Response(
+      JSON.stringify({
+        error: lastError?.message || "Gagal menghasilkan respon dari Gemini."
+      }),
+      { status: 502, headers: { "Content-Type": "application/json" } }
+    );
   } catch (error) {
     console.error(error);
-    return {
-      statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Terjadi kesalahan pada server." })
-    };
+    return new Response(JSON.stringify({ error: "Terjadi kesalahan pada server." }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
   }
 };
